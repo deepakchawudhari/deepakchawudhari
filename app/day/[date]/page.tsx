@@ -34,9 +34,15 @@ export default function DayDetail({ params }: { params: { date: string } }) {
   const [dailyGoal, setDailyGoal] = useState(1500)
   const [formattedDate, setFormattedDate] = useState("")
   const [loading, setLoading] = useState(true)
+  const [isClient, setIsClient] = useState(false)
 
-  const { user, signOut } = useAuth()
+  const { user, signOut, isRememberMeEnabled } = useAuth()
   const supabase = createClientComponentClient()
+
+  // Set isClient to true when component mounts (client-side only)
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const loadData = async () => {
     if (!user) return
@@ -174,9 +180,32 @@ export default function DayDetail({ params }: { params: { date: string } }) {
                   </AlertDialogContent>
                 </AlertDialog>
               )}
-              <Button variant="ghost" size="sm" onClick={signOut} className="text-red-500">
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-red-500">
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Sign Out</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to sign out? You'll need to log in again to access your calorie data.
+                      {isClient && isRememberMeEnabled() && (
+                        <span className="block mt-2 text-sm text-gray-500">
+                          Your "Remember Me" preference will be cleared.
+                        </span>
+                      )}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={signOut} className="bg-red-500 hover:bg-red-600">
+                      Sign Out
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </div>

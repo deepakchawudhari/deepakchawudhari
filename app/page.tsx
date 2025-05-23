@@ -48,9 +48,15 @@ export default function CalorieCounter() {
   const [steps, setSteps] = useState(0)
   const [stepsGoal, setStepsGoal] = useState(10000)
   const [loading, setLoading] = useState(true)
+  const [isClient, setIsClient] = useState(false)
 
-  const { user, signOut } = useAuth()
+  const { user, signOut, isRememberMeEnabled } = useAuth()
   const supabase = createClientComponentClient()
+
+  // Set isClient to true when component mounts (client-side only)
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Initialize date and load user data
   useEffect(() => {
@@ -237,7 +243,7 @@ export default function CalorieCounter() {
                     <AlertDialogTitle>Sign Out</AlertDialogTitle>
                     <AlertDialogDescription>
                       Are you sure you want to sign out? You'll need to log in again to access your calorie data.
-                      {localStorage.getItem("rememberMe") && (
+                      {isClient && isRememberMeEnabled() && (
                         <span className="block mt-2 text-sm text-gray-500">
                           Your "Remember Me" preference will be cleared.
                         </span>

@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/components/auth-provider"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(true) // Default to true for better UX
   const router = useRouter()
   const supabase = createClientComponentClient()
+  const { setRememberMe: setGlobalRememberMe } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,14 +38,7 @@ export default function LoginPage() {
         setError(error.message)
       } else {
         // Set session persistence based on remember me option
-        if (rememberMe) {
-          // Store a flag in localStorage to indicate long-term session
-          localStorage.setItem("rememberMe", "true")
-        } else {
-          // Clear any existing remember me flag
-          localStorage.removeItem("rememberMe")
-        }
-
+        setGlobalRememberMe(rememberMe)
         router.push("/")
         router.refresh()
       }

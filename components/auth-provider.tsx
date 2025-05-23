@@ -11,12 +11,16 @@ interface AuthContextType {
   user: User | null
   loading: boolean
   signOut: () => Promise<void>
+  isRememberMeEnabled: () => boolean
+  setRememberMe: (value: boolean) => void
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   signOut: async () => {},
+  isRememberMeEnabled: () => false,
+  setRememberMe: () => {},
 })
 
 export const useAuth = () => {
@@ -34,6 +38,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClientComponentClient()
   const router = useRouter()
 
+  // Safe localStorage access
+  const isRememberMeEnabled = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("rememberMe") === "true"
+    }
+    return false
+  }
+
+  const setRememberMe = (value: boolean) => {
+    if (typeof window !== "undefined") {
+      if (value) {
+        localStorage.setItem("rememberMe", "true")
+      } else {
+        localStorage.removeItem("rememberMe")
+      }
+    }
+  }
+
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
@@ -45,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null)
 
         // If no session but remember me is set, try to refresh
-        if (!session && localStorage.getItem("rememberMe") === "true") {
+        if (!session && isRememberMeEnabled()) {
           const { data: refreshData } = await supabase.auth.refreshSession()
           if (refreshData.session) {
             setUser(refreshData.session.user)
@@ -73,14 +95,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Handle sign out
       if (event === "SIGNED_OUT") {
-        localStorage.removeItem("rememberMe")
+        setRememberMe(false)
         router.push("/auth/login")
       }
 
       // Handle sign in
       if (event === "SIGNED_IN" && session) {
         // Redirect to main app if on auth pages
-        if (window.location.pathname.startsWith("/auth/")) {
+        if (typeof window !== "undefined" && window.location.pathname.startsWith("/auth/")) {
           router.push("/")
         }
       }
@@ -90,9 +112,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase.auth, router, initialLoad])
 
   const signOut = async () => {
-    localStorage.removeItem("rememberMe")
+    setRememberMe(false)
     await supabase.auth.signOut()
   }
 
-  return <AuthContext.Provider value={{ user, loading, signOut }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, loading, signOut, isRememberMeEnabled, setRememberMe }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
