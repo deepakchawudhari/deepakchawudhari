@@ -8,7 +8,14 @@ let supabaseClient: ReturnType<typeof createClient> | null = null
 
 export const createClientComponentClient = () => {
   if (!supabaseClient) {
-    supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: typeof window !== "undefined" ? window.localStorage : undefined,
+      },
+    })
   }
   return supabaseClient
 }

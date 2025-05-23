@@ -226,9 +226,32 @@ export default function CalorieCounter() {
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm" onClick={signOut} className="text-red-500">
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-red-500">
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Sign Out</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to sign out? You'll need to log in again to access your calorie data.
+                      {localStorage.getItem("rememberMe") && (
+                        <span className="block mt-2 text-sm text-gray-500">
+                          Your "Remember Me" preference will be cleared.
+                        </span>
+                      )}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={signOut} className="bg-red-500 hover:bg-red-600">
+                      Sign Out
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
           <p className="text-sm text-gray-500">Remaining = Goal - Food</p>

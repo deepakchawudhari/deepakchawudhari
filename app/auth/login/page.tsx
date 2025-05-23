@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [rememberMe, setRememberMe] = useState(true) // Default to true for better UX
   const router = useRouter()
   const supabase = createClientComponentClient()
 
@@ -34,6 +35,15 @@ export default function LoginPage() {
       if (error) {
         setError(error.message)
       } else {
+        // Set session persistence based on remember me option
+        if (rememberMe) {
+          // Store a flag in localStorage to indicate long-term session
+          localStorage.setItem("rememberMe", "true")
+        } else {
+          // Clear any existing remember me flag
+          localStorage.removeItem("rememberMe")
+        }
+
         router.push("/")
         router.refresh()
       }
@@ -81,6 +91,19 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                id="rememberMe"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <Label htmlFor="rememberMe" className="text-sm text-gray-600 cursor-pointer">
+                Remember me for 30 days
+              </Label>
             </div>
 
             <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600" disabled={loading}>

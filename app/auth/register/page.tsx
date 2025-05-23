@@ -80,7 +80,8 @@ export default function RegisterPage() {
             {success && (
               <Alert>
                 <AlertDescription>
-                  Account created successfully! Please check your email to verify your account. Redirecting to login...
+                  Account created successfully! Please check your email to verify your account. You'll be automatically
+                  logged in after verification. Redirecting to login...
                 </AlertDescription>
               </Alert>
             )}
